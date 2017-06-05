@@ -1,2 +1,2 @@
 # MyMatching.jl
-matching
+Matching algorithms implemented in Julia

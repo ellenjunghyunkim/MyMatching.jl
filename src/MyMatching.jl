@@ -25,6 +25,7 @@ module MyMatching
                     f_matched[f] = m
                     m_unmatched[1] = current_m
                     push!(m_unmatched, current_m)
+                    m_pointers[current_m] += 1
                     continue
                 end
             end

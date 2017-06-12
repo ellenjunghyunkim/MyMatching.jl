@@ -30,7 +30,7 @@ module MyMatching
             end
         end
         m_matched = [findfirst(f_matched, i) for i in 1:num_m]
-        return f_matched, m_matched
+        return m_matched, f_matched
     end
 
 end

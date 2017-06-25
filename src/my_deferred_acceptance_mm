@@ -1,0 +1,40 @@
+function my_deferred_acceptance_mm(prop_prefs::Matrix{Int}, resp_prefs::Matrix{Int}, caps::Vector{Int})
+        num_prop = length(prop_prefs)
+        num_resp = length(resp_prefs)
+        resp_matched = zeros(Int, num_resp)
+        prop_unmatched = collect(1:num_prop)
+        prop_pointers = ones(Int, num_prop)
+        insertarray = ones(Int64, maximum(caps) + 1)*(num_prop+1)
+    #making indptr
+        indptr = Array(Int, num_resp+1)
+        indptr[1] = 1
+        for i in 1:num_resp
+            indptr[i+1] = indptr[i] + caps[i]
+        end
+    #main loop
+        while length(prop_unmatched) > 0
+            prop = prop_unmatched[1]
+            if length(prop_prefs[prop]) < prop_pointers[prop]
+                shift!(prop_unmatched)
+                continue
+            end
+            resp = prop_prefs[prop][prop_pointers[prop]]
+            if prop in resp_prefs[resp] #if m is favorable to f
+                current_prop = resp_matched[resp] 
+                if current_prop == 0 #if f is not married
+                    resp_matched[resp] = prop
+                    shift!(prop_unmatched)
+                    continue
+                elseif findfirst(resp_prefs[resp], current_prop) > findfirst(resp_prefs[resp], prop) #if m is more preferred
+                    resp_matched[resp] = prop
+                    prop_unmatched[1] = current_prop
+                    prop_pointers[current_prop] += 1
+                    continue
+                end
+            end
+            prop_pointers[prop] += 1
+        end
+
+        prop_matched = Int[findfirst(resp_matched, i) for i in 1:num_prop]
+        return prop_matched, resp_matched, indptr
+    end

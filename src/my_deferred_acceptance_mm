@@ -1,7 +1,7 @@
 function my_deferred_acceptance_mm(prop_prefs::Matrix{Int}, resp_prefs::Matrix{Int}, caps::Vector{Int})
         num_prop = length(prop_prefs)
         num_resp = length(resp_prefs)
-        resp_matched = zeros(Int, num_resp)
+        resp_matched = zeros(Int, sum(caps))
         prop_unmatched = collect(1:num_prop)
         prop_pointers = ones(Int, num_prop)
         insertarray = ones(Int64, maximum(caps) + 1)*(num_prop+1)

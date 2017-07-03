@@ -1,9 +1,9 @@
 module MyMatching
     export my_deferred_acceptance
 
-    function my_deferred_acceptance(prop_prefs::Matrix{Int},
-                                   resp_prefs::Matrix{Int}, 
-                                   caps::Vector{Int})
+    function my_deferred_acceptance(prop_prefs::Vector{Vector{Int}},
+                                resp_prefs::Vector{Vector{Int}},
+                                caps::Vector{Int})
         num_prop = length(prop_prefs)
         num_resp = length(resp_prefs)
         
@@ -33,8 +33,8 @@ module MyMatching
                     else
                         list= resp_matched[indptr[k]:indptr[k+1]-1]
                         ranking = zeros(Int, caps[k])
-                        for j in j:caps[k]
-                            ranking[j]= findfirst(resp_prefs[k],list(j))
+                        for e in e:caps[k]
+                            ranking[e]= findfirst(resp_prefs[k],list[e])
                         end
                         if 0< findfirst(resp_prefs[k],i)<maximum(ranking)
                             resp_matched[indptr[k]+indmax(ranking)-1]=i
@@ -50,12 +50,13 @@ module MyMatching
     return prop_matched, resp_matched, indptr
 end
 
-function my_deferred_acceptance(prop_prefs::Vector{Vector{Int}},
-                                resp_prefs::Vector{Vector{Int}})
+function my_deferred_acceptance(prop_prefs::Matrix{Int},
+                                   resp_prefs::Matrix{Int})
     caps = ones(Int, length(resp_prefs))
-    prop_matches, resp_matches, indptr =
+    
+    prop_matched, resp_matched, indptr =
         my_deferred_acceptance(prop_prefs, resp_prefs, caps)
-    return prop_matches, resp_matches
+    return prop_matched, resp_matched
 end
 
 export my_deferred_acceptance

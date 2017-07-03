@@ -49,3 +49,15 @@ module MyMatching
     end
     return prop_matched, resp_matched, indptr
 end
+
+function my_deferred_acceptance(prop_prefs::Vector{Vector{Int}},
+                                resp_prefs::Vector{Vector{Int}})
+    caps = ones(Int, length(resp_prefs))
+    prop_matches, resp_matches, indptr =
+        my_deferred_acceptance(prop_prefs, resp_prefs, caps)
+    return prop_matches, resp_matches
+end
+
+export my_deferred_acceptance
+
+end

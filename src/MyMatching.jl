@@ -1,37 +1,63 @@
 module MyMatching
-    export my_deferred_acceptance
+    export my_deferred_acceptance_mm
 
-    function my_deferred_acceptance(m_prefs, f_prefs)
-        num_m = length(m_prefs)
-        num_f = length(f_prefs)
-        f_matched = zeros(Int, num_f)
-        m_unmatched = collect(1:num_m)
-        m_pointers = ones(Int, num_m)
-
-        while length(m_unmatched) > 0
-            m = m_unmatched[1]
-            if length(m_prefs[m]) < m_pointers[m]
-                shift!(m_unmatched)
-                continue
-            end
-            f = m_prefs[m][m_pointers[m]]
-            if m in f_prefs[f] #if m is favorable to f
-                current_m = f_matched[f] 
-                if current_m == 0 #if f is not married
-                    f_matched[f] = m
-                    shift!(m_unmatched)
-                    continue
-                elseif findfirst(f_prefs[f], current_m) > findfirst(f_prefs[f], m) #if m is more preferred
-                    f_matched[f] = m
-                    m_unmatched[1] = current_m
-                    m_pointers[current_m] += 1
-                    continue
-                end
-            end
-            m_pointers[m] += 1
+    function my_deferred_acceptance_mm(prop_prefs::Matrix{Int},
+                                   resp_prefs::Matrix{Int}, 
+                                   caps::Vector{Int})
+        num_prop = length(prop_prefs)
+        num_resp = length(resp_prefs)
+        
+        prop_matched = zeros(Int,num_prop)
+        resp_matched = zeros(Int, sum(caps))
+        
+        prop_pointers = ones(Int, num_prop)
+        accept = zeros(Int,num_resp)
+    #making indptr
+        indptr = Array{Int}(num_resp+1)
+        indptr[1] = 1
+        for i in 1:num_resp
+            indptr[i+1] = indptr[i] + caps[i]
         end
-
-        m_matched = Int[findfirst(f_matched, i) for i in 1:num_m]
-        return m_matched, f_matched
+    #main loop
+    
+        for j in 1:num_resp
+            for i in 1:num_prop
+                if prop_matched[i] == 0 && prop_pointers[i] <= length(prop_prefs[i])
+                k = prop_prefs[i][prop_pointers[i]]
+                if findfirst(resp_prefs[k],i) != 0
+                    if accept[k] < caps[k]
+                        resp_matched[indptr[k+1]-1 - accept[k]]=i
+                        prop_matched[i]=k
+                        accept[k]+=1
+                    
+                    else
+                        list= resp_matched[indptr[k]:indptr[k+1]-1]
+                        ranking = zeros(Int, caps[k])
+                        for j in j:caps[k]
+                            ranking[j]= findfirst(resp_prefs[k],list(j))
+                        end
+                        if 0< findfirst(resp_prefs[k],i)<maximum(ranking)
+                            resp_matched[indptr[k]+indmax(ranking)-1]=i
+                            prop_matched[list[indmax(ranking)]]=0
+                            prop_matched[i]=k
+                        end
+                    end
+                end
+                prop_pointers[i]+=1
+            end
+        end
     end
+    return prop_matched, resp_matched, indptr
+end
+
+function my_deferred_acceptance(prop_prefs::Vector{Vector{Int}},
+                                resp_prefs::Vector{Vector{Int}})
+    caps = ones(Int, length(resp_prefs))
+    prop_matches, resp_matches, indptr =
+        my_deferred_acceptance(prop_prefs, resp_prefs, caps)
+    return prop_matches, resp_matches
+end
+
+export my_deferred_acceptance
+
 end

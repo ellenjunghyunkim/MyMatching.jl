@@ -1,7 +1,7 @@
 module MyMatching
-    export my_deferred_acceptance_mm
+    export my_deferred_acceptance
 
-    function my_deferred_acceptance_mm(prop_prefs::Matrix{Int},
+    function my_deferred_acceptance(prop_prefs::Matrix{Int},
                                    resp_prefs::Matrix{Int}, 
                                    caps::Vector{Int})
         num_prop = length(prop_prefs)
